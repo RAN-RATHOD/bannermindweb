@@ -73,7 +73,7 @@ const Features = () => {
     // },
 
    { icon: '🤖',
-title: 'AI-Powered Enhancement',
+title: 'AI-Generated Images',
 description: 'Generate high-quality images and enhance your banners with advanced AI features. No design skills required.',
 gradient: 'gradient-1'
    },

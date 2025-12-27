@@ -6,13 +6,13 @@
   justify-content: center;
   overflow: hidden;
   padding-top: 80px;
-  /* Match video background color for seamless blend */
-  background: linear-gradient(135deg, #0d0d12 0%, #0a0a0f 50%, #0d0d12 100%);
+  /* Single continuous background - dark theme */
+  background: #0d0d12;
 }
 
-/* Light theme hero background - exact match with White BG.mp4 for seamless blend */
+/* Light theme hero - single solid background matching White BG.mp4 edge color */
 [data-theme="light"] .hero {
-  background: linear-gradient(to right, #e8d5f5 0%, #dbc8ed 40%, #d4bfe8 70%, #d0bae5 100%);
+  background: #e0d0eb;
 }
 
 .hero-background {
@@ -28,66 +28,48 @@
 .gradient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
+  filter: blur(120px);
+  opacity: 0.15;
   animation: float 20s infinite ease-in-out;
   z-index: 0;
 }
 
 .orb-1 {
-  width: 500px;
-  height: 500px;
+  width: 600px;
+  height: 600px;
   background: var(--primary-color);
-  top: -200px;
-  left: -200px;
+  top: -300px;
+  left: -300px;
   animation-delay: 0s;
+  opacity: 0.1;
 }
 
 .orb-2 {
-  width: 400px;
-  height: 400px;
+  width: 500px;
+  height: 500px;
   background: var(--secondary-color);
-  bottom: -150px;
-  right: -150px;
+  bottom: -250px;
+  right: -250px;
   animation-delay: 2s;
+  opacity: 0.1;
 }
 
+/* Hidden center orb - removed to eliminate visual divider */
 .orb-3 {
-  width: 300px;
-  height: 300px;
-  background: var(--accent-color);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation-delay: 4s;
+  display: none;
 }
 
-/* Additional orbs for light theme enhancement */
+/* Hidden additional orbs in dark theme for clean unified background */
 .orb-4 {
-  width: 350px;
-  height: 350px;
-  background: linear-gradient(135deg, #a855f7, #ec4899);
-  top: 20%;
-  right: 10%;
-  animation-delay: 1s;
+  display: none;
 }
 
 .orb-5 {
-  width: 280px;
-  height: 280px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  bottom: 20%;
-  left: 15%;
-  animation-delay: 3s;
+  display: none;
 }
 
 .orb-6 {
-  width: 320px;
-  height: 320px;
-  background: linear-gradient(135deg, #f97316, #ec4899);
-  top: 60%;
-  right: 25%;
-  animation-delay: 5s;
+  display: none;
 }
 
 /* Light theme specific blob styles */
@@ -349,15 +331,16 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 55%;
+  width: 60%;
   height: 100%;
   background: linear-gradient(
     to right,
     #0d0d12 0%,
-    rgba(13, 13, 18, 0.98) 10%,
-    rgba(13, 13, 18, 0.85) 30%,
-    rgba(13, 13, 18, 0.5) 55%,
-    rgba(13, 13, 18, 0.2) 75%,
+    #0d0d12 8%,
+    rgba(13, 13, 18, 0.95) 20%,
+    rgba(13, 13, 18, 0.7) 40%,
+    rgba(13, 13, 18, 0.3) 60%,
+    rgba(13, 13, 18, 0.1) 80%,
     transparent 100%
   );
   z-index: 2;
@@ -399,8 +382,13 @@
   pointer-events: none;
 }
 
-/* Dark theme - subtle purple glow on video edge for depth */
+/* Removed purple glow for clean unified background */
 .hero-video-container::after {
+  display: none;
+}
+
+/* Original glow code - disabled
+.hero-video-container-glow-disabled::after {
   content: '';
   position: absolute;
   top: 15%;
@@ -419,34 +407,36 @@
   pointer-events: none;
 }
 
-/* Light theme video styles - seamless blend as one unified section */
+/* Light theme video styles - seamless blend matching hero solid background */
 [data-theme="light"] .hero-video-wrapper::before {
   background: linear-gradient(
     to right,
-    #d0bae5 0%,
-    rgba(208, 186, 229, 0.85) 15%,
-    rgba(208, 186, 229, 0.5) 35%,
-    rgba(208, 186, 229, 0.2) 55%,
-    transparent 75%
+    #e0d0eb 0%,
+    #e0d0eb 10%,
+    rgba(224, 208, 235, 0.95) 25%,
+    rgba(224, 208, 235, 0.7) 45%,
+    rgba(224, 208, 235, 0.35) 65%,
+    rgba(224, 208, 235, 0.1) 85%,
+    transparent 100%
   );
-  width: 40%;
+  width: 65%;
 }
 
 [data-theme="light"] .hero-video-wrapper::after {
   background: linear-gradient(
     to bottom,
-    rgba(232, 213, 245, 0.6) 0%,
-    rgba(232, 213, 245, 0.3) 50%,
+    #e0d0eb 0%,
+    rgba(224, 208, 235, 0.7) 50%,
     transparent 100%
   );
-  height: 60px;
+  height: 80px;
 }
 
 [data-theme="light"] .hero-video-glow {
   background: linear-gradient(
     to top,
-    rgba(208, 186, 229, 0.5) 0%,
-    rgba(208, 186, 229, 0.2) 40%,
+    rgba(224, 208, 235, 0.5) 0%,
+    rgba(224, 208, 235, 0.2) 50%,
     transparent 100%
   );
   height: 80px;
@@ -496,100 +486,168 @@
   }
 }
 
-@media (max-width: 968px) {
+/* ============================================
+   MOBILE HERO LAYOUT (<1024px)
+   Video becomes full-width background
+   Text overlays the video
+   ============================================ */
+
+@media (max-width: 1023px) {
   .hero {
     padding-bottom: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
+  /* Video becomes full-screen background */
+  .hero-video-container {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    z-index: 0 !important;
+  }
+
+  .hero-video-wrapper {
+    border-radius: 0 !important;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-video {
+    border-radius: 0 !important;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* Reset desktop gradient masks */
+  .hero-video-wrapper::before,
+  .hero-video-wrapper::after,
+  .hero-video-glow,
+  .hero-video-container::after {
+    display: none !important;
+  }
+
+  /* Add theme-aware overlay for text readability */
+  .hero-video-wrapper::before {
+    display: block !important;
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    /* Dark theme overlay */
+    background: linear-gradient(
+      to bottom,
+      rgba(13, 13, 18, 0.7) 0%,
+      rgba(13, 13, 18, 0.85) 50%,
+      rgba(13, 13, 18, 0.9) 100%
+    );
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Light theme mobile overlay */
+  [data-theme="light"] .hero-video-wrapper::before {
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.75) 0%,
+      rgba(248, 245, 252, 0.85) 50%,
+      rgba(240, 235, 250, 0.92) 100%
+    ) !important;
+  }
+
+  /* Hero container - content on top */
   .hero-container {
+    position: relative;
+    z-index: 2;
     flex-direction: column;
     text-align: center;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding: 2rem 1.5rem;
     min-height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .hero-content {
     max-width: 100%;
-    z-index: 2;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .hero-title {
     font-size: 2.5rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   }
 
-  /* On tablet/mobile, video becomes a section below */
-  .hero-video-container {
-    position: relative;
-    top: auto;
-    right: auto;
-    width: 100%;
-    height: 350px;
-    margin-top: 2rem;
-    border-radius: 16px;
-    overflow: hidden;
+  .hero-subtitle {
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
   }
 
-  .hero-video-wrapper {
-    border-radius: 16px;
+  /* Light theme text shadow adjustment */
+  [data-theme="light"] .hero-title {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
 
-  .hero-video {
-    border-radius: 16px;
-  }
-
-  /* Reset gradient masks for mobile card style */
-  .hero-video-wrapper::before {
-    display: none;
-  }
-
-  .hero-video-wrapper::after {
-    display: none;
-  }
-
-  .hero-video-glow {
-    display: none;
-  }
-
-  .hero-video-container::after {
-    display: none;
+  [data-theme="light"] .hero-subtitle {
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
   }
 
   .hero-cta {
     justify-content: center;
   }
+
+  /* Hide background orbs on mobile - video is the background */
+  .hero-background {
+    display: none;
+  }
 }
 
-@media (max-width: 568px) {
+@media (max-width: 768px) {
   .hero-title {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 
   .hero-subtitle {
     font-size: 1rem;
   }
 
+  .hero-container {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 568px) {
+  .hero-title {
+    font-size: 1.8rem;
+    line-height: 1.2;
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+
   .hero-cta {
     flex-direction: column;
+    gap: 0.75rem;
   }
 
-  .btn-primary,
-  .btn-secondary {
+  .hero-cta .btn-primary,
+  .hero-cta .btn-secondary {
     width: 100%;
-  }
-
-  .hero-video-container {
-    height: 250px;
-    margin-top: 1.5rem;
-    border-radius: 12px;
-  }
-
-  .hero-video-wrapper {
-    border-radius: 12px;
-  }
-
-  .hero-video {
-    border-radius: 12px;
+    max-width: 280px;
   }
 }
 

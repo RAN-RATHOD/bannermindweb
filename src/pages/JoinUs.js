@@ -250,11 +250,9 @@ const JoinUs = () => {
           </p>
           <div className="hero-ctas">
             <a href="#contact" className="cta-primary">
-              Become a Partner
+             Contact Us
             </a>
-            <a href="#contact" className="cta-secondary">
-              Contact Team
-            </a>
+            
           </div>
         </div>
       </section>
