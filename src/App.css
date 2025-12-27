@@ -1,0 +1,59 @@
+.App {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  overflow-x: hidden;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Section spacing */
+section {
+  position: relative;
+  padding: 5rem 0;
+}
+
+/* Override for poster scroll sequence - no padding */
+#see-our-work {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* 3D Transform utilities */
+.rotate-3d {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.scale-on-scroll {
+  transform-origin: center;
+}
+
+.blur-reveal {
+  will-change: filter, opacity;
+}
+
+.magnetic {
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+/* Performance optimizations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

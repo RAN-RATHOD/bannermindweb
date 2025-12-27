@@ -1,0 +1,43 @@
+.logo-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.logo-container:hover {
+  transform: scale(1.05);
+}
+
+.logo-image {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+  /* Using original logo as provided by client - no modifications */
+  transition: opacity 0.3s ease;
+}
+
+/* Navbar specific styling */
+.navbar .logo-image {
+  height: 45px;
+}
+
+/* Footer specific styling */
+.footer-logo .logo-image {
+  height: 60px;
+}
+
+@media (max-width: 768px) {
+  .logo-image {
+    height: 60px;
+  }
+
+  .navbar .logo-image {
+    height: 38px;
+  }
+
+  .footer-logo .logo-image {
+    height: 50px;
+  }
+}
+

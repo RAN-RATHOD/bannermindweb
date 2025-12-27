@@ -1,0 +1,336 @@
+/* Main scroll section - horizontal Swiper scrolling */
+.poster-scroll-section {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--dark-bg); /* Match website theme */
+  margin: 0 !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
+  padding-top: 0 !important;
+  box-sizing: border-box;
+}
+
+/* Horizontal line removed per user request */
+
+/* Remove extra spacing */
+#see-our-work.poster-scroll-section {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Inner container - horizontal Swiper wrapper */
+.poster-scroll-inner {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: visible;
+}
+
+/* Swiper container */
+.poster-swiper {
+  width: 100%;
+  height: 100%;
+  padding: 2rem 0 6rem;
+}
+
+.poster-swiper-slide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Vector guy INSIDE the poster - positioned in empty area */
+.poster-person {
+  position: absolute;
+  bottom: 0; /* Feet on bottom of poster */
+  right: 18px; /* Keep him in the same corner - INSIDE the poster */
+  width: 51%; /* 50% BIGGER (34% * 1.5 = 51%) */
+  max-width: 240px; /* Increased max-width for larger size */
+  height: auto;
+  pointer-events: none;
+  z-index: 10; /* Above poster background - looks pasted on top */
+  transform-origin: bottom center;
+  object-fit: contain;
+  /* Performance optimizations */
+  backface-visibility: hidden;
+  /* Soft glow/shadow effect */
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));
+  /* Animation will be triggered by GSAP ScrollTrigger, not auto-play */
+  /* Initial state - will be animated by GSAP */
+  display: block !important; /* Ensure element is always rendered */
+  visibility: visible !important; /* Ensure element is visible in DOM */
+}
+
+/* Attractive pop effect: zoom out then zoom in with bounce */
+@keyframes posterCharPopZoom {
+  0% {
+    transform: scale(0.6) translateY(40px);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(0.7) translateY(30px); /* Continue zooming out */
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(0.65) translateY(20px); /* Zoom OUT more (minimum size) */
+    opacity: 0.7;
+  }
+  65% {
+    transform: scale(1.15) translateY(-5px); /* Zoom IN with overshoot (pop effect) */
+    opacity: 1;
+  }
+  85% {
+    transform: scale(0.98) translateY(0); /* Slight bounce back */
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.0) translateY(0); /* Settle to normal size */
+    opacity: 1;
+  }
+}
+
+/* Each poster slide - horizontal layout */
+.poster-slide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Poster slide inner container - this is the poster-wrapper */
+.poster-slide-inner.poster-wrapper {
+  position: relative !important; /* CRITICAL: char aligns to this - absolute positioning relative to this */
+  width: 420px; /* Fixed width matching poster image */
+  max-width: 100%;
+  height: auto;
+  display: block;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden !important; /* CRITICAL: KEEP PERSON INSIDE POSTER - cannot escape to white area */
+  border-radius: 24px;
+  margin: 0 auto; /* Center the poster */
+  /* Ensure character stays inside boundaries */
+  contain: layout style paint;
+  /* Force containment */
+  isolation: isolate;
+}
+
+/* Poster background image (WITHOUT person) */
+.poster-image.poster-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain; /* Show full poster */
+  border-radius: 24px;
+  position: relative; /* Ensure it's in the stacking context */
+  z-index: 1; /* Below character but above background */
+  /* Performance optimizations */
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU acceleration */
+  backface-visibility: hidden;
+}
+
+/* Person image inside each poster (printed in design) - FAINT PLACEHOLDER/GHOST */
+/* Removed placeholder character - poster images should not have person in them */
+
+/* Poster content area */
+.poster-slide-content {
+  flex: 1;
+  max-width: 800px;
+  padding-left: 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 165px;
+  z-index: 2;
+  position: relative;
+  align-items: flex-start;
+}
+
+.step-icon {
+  font-size: 4rem;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
+}
+
+.poster-badge {
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: fit-content;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.poster-slide-title {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  text-align: left;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.poster-slide-description {
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
+  line-height: 1.7;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  font-weight: 400;
+  max-width: 600px;
+}
+
+.poster-slide-category {
+  display: inline-block;
+  padding: 0.6rem 2rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.95);
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  width: fit-content;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Removed decorative elements for cleaner step-by-step design */
+
+/* Responsive design */
+@media (max-width: 900px) {
+  /* Live character on mobile */
+  .live-character {
+    width: 150px;
+  }
+
+  /* Poster layout on mobile */
+  .poster-slide-inner {
+    flex-direction: column;
+    padding: 1rem;
+    justify-content: center;
+    gap: 165px;
+    margin: 1rem;
+    width: calc(100% - 2rem);
+    height: calc(100% - 2rem);
+  }
+
+  .poster-image {
+    border-radius: 16px;
+  }
+
+  .poster-person-container {
+    width: 120px;
+    height: auto;
+    bottom: 5%;
+    right: 5%;
+  }
+
+  .person-in-poster {
+    width: 120px;
+    max-height: 180px;
+  }
+
+  .poster-slide-content {
+    padding-left: 0;
+    text-align: center;
+    align-items: center;
+  }
+
+  .step-icon {
+    font-size: 3rem;
+  }
+
+  .poster-slide-title {
+    font-size: 2.5rem;
+    text-align: center;
+  }
+
+  .poster-slide-description {
+    font-size: 1.1rem;
+    text-align: center;
+    max-width: 100%;
+  }
+  
+  .poster-swiper {
+    padding: 1rem 0 4rem;
+  }
+  
+  .poster-swiper-slide {
+    padding: 1rem;
+  }
+}
+
+/* Swiper Navigation Buttons - Positioning Only (styling in global) */
+.poster-swiper .swiper-button-next,
+.poster-swiper .swiper-button-prev {
+  margin-top: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.poster-swiper .swiper-button-next:hover,
+.poster-swiper .swiper-button-prev:hover {
+  transform: translateY(-50%) scale(1.08);
+}
+
+.poster-swiper .swiper-button-next {
+  right: max(2rem, calc((100vw - 1200px) / 2 + 2rem));
+}
+
+.poster-swiper .swiper-button-prev {
+  left: max(2rem, calc((100vw - 1200px) / 2 + 2rem));
+}
+
+/* Swiper Pagination */
+.poster-swiper .swiper-pagination {
+  bottom: 20px;
+}
+
+.poster-swiper .swiper-pagination-bullet {
+  background: var(--primary-color);
+  opacity: 0.3;
+  width: 12px;
+  height: 12px;
+  transition: all 0.3s ease;
+}
+
+.poster-swiper .swiper-pagination-bullet-active {
+  opacity: 1;
+  width: 24px;
+  border-radius: 6px;
+  background: var(--gradient-1);
+}
+
+/* Mobile Swiper Navigation - Positioning Only */
+@media (max-width: 900px) {
+  .poster-swiper .swiper-button-next {
+    right: 1.5rem;
+  }
+  
+  .poster-swiper .swiper-button-prev {
+    left: 1.5rem;
+  }
+}

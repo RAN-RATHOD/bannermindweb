@@ -1,0 +1,56 @@
+.floating-person {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 180px;
+  z-index: 100;
+  pointer-events: none;
+  transform-origin: center center;
+  will-change: transform;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.person-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.4));
+}
+
+.floating-person.floating {
+  z-index: 100;
+}
+
+.floating-person.in-poster {
+  z-index: 5;
+}
+
+.floating-person.popping {
+  z-index: 6;
+}
+
+/* Ensure posters can clip the person */
+.poster-target {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .floating-person {
+    width: 80px;
+    height: 120px;
+  }
+
+  .person-svg {
+    filter: drop-shadow(0 2px 8px rgba(99, 102, 241, 0.3));
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .floating-person {
+    display: none !important;
+  }
+}
+

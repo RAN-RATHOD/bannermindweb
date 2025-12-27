@@ -1,0 +1,313 @@
+:root {
+  --person-top: 28vh;   /* how far from top the sticky person sits */
+  --person-width: 140px;
+}
+
+/* Horizontal Poster Slider Section */
+.horizontal-poster-slider {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--dark-bg);
+}
+
+/* Sticky wrapper keeps the single person visible while scrolling */
+#person-wrapper {
+  position: sticky;
+  top: var(--person-top);
+  height: 300px;          /* Match person height so wrapper has dimensions */
+  pointer-events: none;   /* allow clicks to pass through */
+  z-index: 60;
+  display: block !important;
+  left: 0;
+  width: 100%;
+  overflow: visible;      /* Ensure person can be seen outside wrapper */
+  background: transparent;
+}
+
+/* Basic sizing for person SVG (replace with real SVG file) */
+#person {
+  width: 200px; /* Increased for better visibility */
+  height: 300px; /* Increased for better visibility */
+  display: block !important;
+  transform-origin: center bottom;
+  will-change: transform;
+  position: absolute;
+  left: 0;
+  top: 0;
+  filter: drop-shadow(0 8px 25px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.5));
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 61;
+  background: transparent;
+  mix-blend-mode: normal;
+}
+
+/* Update viewBox to match new proportions */
+#person[viewBox="0 0 100 140"] {
+  viewBox: "0 0 100 140"; /* Keep original viewBox for scaling */
+}
+
+/* Ensure person group is visible */
+#person-group {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Horizontal slider container */
+.slider-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.slider-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Basic poster layout - 100vw each */
+.poster {
+  min-width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  box-sizing: border-box;
+  scroll-snap-align: start;
+  position: relative;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Poster inner content */
+.poster-inner {
+  width: min(1100px, 92%);
+  margin: 0 auto;
+  padding: 0;
+}
+
+.poster-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+  text-align: center;
+}
+
+.poster-category {
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  border-radius: 25px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(10px);
+}
+
+.poster-title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #FFFFFF;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
+}
+
+.poster-description {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 600px;
+  margin: 0;
+  line-height: 1.6;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.poster-mockup {
+  width: 100%;
+  max-width: 800px;
+  height: 400px;
+  border-radius: 20px;
+  padding: 2rem;
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.mockup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+.mockup-element {
+  height: 60px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.mockup-element:nth-child(2) {
+  animation-delay: 0.3s;
+  height: 80px;
+}
+
+.mockup-element:nth-child(3) {
+  animation-delay: 0.6s;
+  height: 100px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Visible focus for keyboard users */
+.poster:focus {
+  outline: 3px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 6px;
+}
+
+/* Navigation controls */
+.slider-nav {
+  position: fixed;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+}
+
+.nav-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: #FFFFFF;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+.nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.nav-dots {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.nav-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.nav-dot:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(1.2);
+}
+
+.nav-dot.active {
+  background: #FFFFFF;
+  border-color: #FFFFFF;
+  width: 32px;
+  border-radius: 6px;
+}
+
+/* Hide person on small screens for now (mobile fallback) */
+@media (max-width: 900px) {
+  #person-wrapper {
+    display: none;
+  }
+
+  .poster-title {
+    font-size: 2.5rem;
+  }
+
+  .poster-description {
+    font-size: 1.1rem;
+  }
+
+  .poster-mockup {
+    height: 300px;
+  }
+
+  .slider-nav {
+    bottom: 2rem;
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .slider-container {
+    scroll-behavior: auto;
+  }
+
+  #person,
+  .person-group {
+    animation: none !important;
+  }
+
+  .mockup-element {
+    animation: none !important;
+  }
+}
+
+/* Large screen adjustments */
+@media (min-width: 1400px) {
+  .poster-inner {
+    max-width: 1200px;
+  }
+
+  .poster-title {
+    font-size: 4rem;
+  }
+}
+

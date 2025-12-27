@@ -1,0 +1,321 @@
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import './FloatingPerson.css';
+
+const FloatingPerson = () => {
+  const personRef = useRef(null);
+  const [activePoster, setActivePoster] = useState(null);
+  const [isPopping, setIsPopping] = useState(false);
+  const positionRef = useRef({ x: 0, y: 0, scale: 1 });
+  const floatingAnimationRef = useRef(null);
+  const observerRef = useRef(null);
+  const rafRef = useRef(null);
+
+  // Check for reduced motion
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Update transform
+  const updateTransform = useCallback(() => {
+    if (personRef.current) {
+      const { x, y, scale } = positionRef.current;
+      personRef.current.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+    }
+  }, []);
+
+  // Idle floating animation
+  const startFloatingAnimation = useCallback(() => {
+    if (activePoster || prefersReducedMotion) return;
+
+    let floatOffset = 0;
+    const animate = () => {
+      if (activePoster || !personRef.current) {
+        floatingAnimationRef.current = null;
+        return;
+      }
+
+      floatOffset += 0.02;
+      const floatY = Math.sin(floatOffset) * 3;
+      
+      positionRef.current = {
+        ...positionRef.current,
+        y: positionRef.current.y + (floatY * 0.1)
+      };
+      
+      updateTransform();
+      floatingAnimationRef.current = requestAnimationFrame(animate);
+    };
+
+    if (!floatingAnimationRef.current) {
+      floatingAnimationRef.current = requestAnimationFrame(animate);
+    }
+  }, [activePoster, updateTransform]);
+
+  // Stop floating animation
+  const stopFloatingAnimation = useCallback(() => {
+    if (floatingAnimationRef.current) {
+      cancelAnimationFrame(floatingAnimationRef.current);
+      floatingAnimationRef.current = null;
+    }
+  }, []);
+
+  // Animate to poster with pop effect
+  const animateToPoster = useCallback((posterElement, posterId) => {
+    if (!personRef.current || prefersReducedMotion) return;
+
+    stopFloatingAnimation();
+
+    const posterRect = posterElement.getBoundingClientRect();
+    const anchorX = parseFloat(posterElement.dataset.anchorX || '0.2');
+    const anchorY = parseFloat(posterElement.dataset.anchorY || '0.3');
+
+    // Calculate target position (center of viewport + offset to poster)
+    const viewportCenterX = window.innerWidth / 2;
+    const viewportCenterY = window.innerHeight / 2;
+    const personWidth = 120;
+    const personHeight = 180;
+
+    const targetX = posterRect.left + (posterRect.width * anchorX) - viewportCenterX - (personWidth / 2);
+    const targetY = posterRect.top + (posterRect.height * anchorY) - viewportCenterY - (personHeight / 2);
+
+    // Move to poster
+    personRef.current.style.transition = 'transform 500ms cubic-bezier(0.2, 0.9, 0.25, 1)';
+    positionRef.current = { x: targetX, y: targetY, scale: 1 };
+    updateTransform();
+
+    // Pop effect after movement
+    setTimeout(() => {
+      setIsPopping(true);
+      personRef.current.style.transition = 'transform 350ms cubic-bezier(0.2, 0.9, 0.25, 1)';
+      positionRef.current = { ...positionRef.current, scale: 1.12 };
+      updateTransform();
+
+      setTimeout(() => {
+        positionRef.current = { ...positionRef.current, scale: 1 };
+        updateTransform();
+        setTimeout(() => {
+          setIsPopping(false);
+          personRef.current.style.transition = 'transform 500ms cubic-bezier(0.2, 0.9, 0.25, 1)';
+        }, 350);
+      }, 350);
+    }, 500);
+  }, [stopFloatingAnimation, updateTransform]);
+
+  // Animate back to floating position
+  const animateToFloating = useCallback(() => {
+    if (!personRef.current || prefersReducedMotion) return;
+
+    stopFloatingAnimation();
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const personWidth = 120;
+    const personHeight = 180;
+
+    const floatingX = (viewportWidth * 0.75) - (viewportWidth / 2) - (personWidth / 2);
+    const floatingY = (viewportHeight * 0.2) - (viewportHeight / 2) - (personHeight / 2);
+
+    personRef.current.style.transition = 'transform 600ms cubic-bezier(0.2, 0.9, 0.25, 1)';
+    positionRef.current = { x: floatingX, y: floatingY, scale: 1 };
+    updateTransform();
+
+    // Start floating animation after movement
+    setTimeout(() => {
+      startFloatingAnimation();
+    }, 600);
+  }, [stopFloatingAnimation, startFloatingAnimation, updateTransform]);
+
+  // Setup IntersectionObserver
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      if (personRef.current) {
+        personRef.current.style.display = 'none';
+      }
+      return;
+    }
+
+    const isMobile = window.innerWidth <= 768;
+    const observerOptions = {
+      root: null,
+      rootMargin: isMobile ? '-20% 0px -20% 0px' : '0px',
+      threshold: isMobile ? [0.25, 0.35, 0.5] : [0.35, 0.5, 0.65]
+    };
+
+    let currentActivePoster = null;
+
+    const handleIntersection = (entries) => {
+      // Find the most visible poster
+      let mostVisible = null;
+      let maxRatio = 0;
+
+      entries.forEach(entry => {
+        const ratio = entry.intersectionRatio;
+        if (ratio >= 0.35 && ratio > maxRatio) {
+          maxRatio = ratio;
+          mostVisible = entry;
+        }
+      });
+
+      if (mostVisible && mostVisible.target) {
+        const posterId = mostVisible.target.dataset.posterId;
+        if (posterId && currentActivePoster !== posterId) {
+          currentActivePoster = posterId;
+          setActivePoster(posterId);
+          animateToPoster(mostVisible.target, posterId);
+        }
+      } else {
+        // Check if any poster is still visible
+        const visibleEntries = entries.filter(e => e.intersectionRatio >= 0.25);
+        if (visibleEntries.length === 0 && currentActivePoster) {
+          currentActivePoster = null;
+          setActivePoster(null);
+          animateToFloating();
+        }
+      }
+    };
+
+    observerRef.current = new IntersectionObserver(handleIntersection, observerOptions);
+
+    // Find all poster targets
+    const findPosters = () => {
+      const posters = [];
+      
+      // Find slide images in ExamplesSlider
+      const slideImages = document.querySelectorAll('.slide-image.poster-target');
+      slideImages.forEach((slideImage) => {
+        if (slideImage.closest('.slide.active')) {
+          posters.push(slideImage);
+        }
+      });
+
+      // Find template cards in Features
+      const templates = document.querySelectorAll('.template-card.poster-target');
+      templates.forEach((template) => {
+        posters.push(template);
+      });
+
+      // Find feature cards in Join Us page
+      const joinUsFeatures = document.querySelectorAll('.feature-card-3d[data-poster-id]');
+      joinUsFeatures.forEach((feature) => {
+        posters.push(feature);
+      });
+
+      // Find additional feature cards in Join Us page
+      const additionalFeatures = document.querySelectorAll('.additional-feature-card[data-poster-id]');
+      additionalFeatures.forEach((feature) => {
+        posters.push(feature);
+      });
+
+      return posters;
+    };
+
+    // Setup observers
+    const setupObservers = () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+
+      const posters = findPosters();
+      posters.forEach(poster => {
+        if (!poster.dataset.posterId) {
+          poster.dataset.posterId = `poster-${Math.random().toString(36).substr(2, 9)}`;
+        }
+        if (!poster.dataset.anchorX) {
+          poster.dataset.anchorX = '0.2';
+        }
+        if (!poster.dataset.anchorY) {
+          poster.dataset.anchorY = '0.3';
+        }
+        observerRef.current.observe(poster);
+      });
+    };
+
+    // Initial setup with delay
+    const setupTimer = setTimeout(() => {
+      setupObservers();
+      animateToFloating();
+    }, 800);
+
+    // Re-setup observers periodically (for dynamic content like slider)
+    const checkInterval = setInterval(() => {
+      setupObservers();
+    }, 1000);
+
+    // Handle resize
+    const handleResize = () => {
+      if (activePoster) {
+        const poster = document.querySelector(`[data-poster-id="${activePoster}"]`);
+        if (poster) {
+          animateToPoster(poster, activePoster);
+        }
+      } else {
+        animateToFloating();
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(setupTimer);
+      clearInterval(checkInterval);
+      window.removeEventListener('resize', handleResize);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+      stopFloatingAnimation();
+    };
+  }, [activePoster, animateToPoster, animateToFloating, stopFloatingAnimation, startFloatingAnimation, prefersReducedMotion]);
+
+  // Start floating animation when not in poster
+  useEffect(() => {
+    if (!activePoster && !prefersReducedMotion) {
+      startFloatingAnimation();
+    } else {
+      stopFloatingAnimation();
+    }
+  }, [activePoster, startFloatingAnimation, stopFloatingAnimation, prefersReducedMotion]);
+
+  if (prefersReducedMotion) {
+    return null;
+  }
+
+  return (
+    <div 
+      ref={personRef}
+      className={`floating-person ${isPopping ? 'popping' : ''} ${activePoster ? 'in-poster' : 'floating'}`}
+      aria-hidden="true"
+    >
+      <svg 
+        width="120" 
+        height="180" 
+        viewBox="0 0 120 180" 
+        xmlns="http://www.w3.org/2000/svg"
+        className="person-svg"
+      >
+        {/* Person vector illustration */}
+        <g>
+          {/* Head */}
+          <circle cx="60" cy="30" r="20" fill="#6366f1" opacity="0.9"/>
+          <circle cx="55" cy="28" r="3" fill="#FFFFFF"/>
+          <circle cx="65" cy="28" r="3" fill="#FFFFFF"/>
+          <path d="M 55 35 Q 60 38 65 35" stroke="#FFFFFF" strokeWidth="2" fill="none" strokeLinecap="round"/>
+          
+          {/* Body */}
+          <rect x="45" y="50" width="30" height="50" rx="5" fill="#818cf8"/>
+          
+          {/* Arms */}
+          <rect x="30" y="55" width="15" height="8" rx="4" fill="#6366f1"/>
+          <rect x="75" y="55" width="15" height="8" rx="4" fill="#6366f1"/>
+          
+          {/* Legs */}
+          <rect x="48" y="100" width="12" height="50" rx="6" fill="#4f46e5"/>
+          <rect x="60" y="100" width="12" height="50" rx="6" fill="#4f46e5"/>
+          
+          {/* Feet */}
+          <ellipse cx="54" cy="155" rx="8" ry="5" fill="#312e81"/>
+          <ellipse cx="66" cy="155" rx="8" ry="5" fill="#312e81"/>
+        </g>
+      </svg>
+    </div>
+  );
+};
+
+export default FloatingPerson;
