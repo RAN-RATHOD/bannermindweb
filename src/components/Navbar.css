@@ -10,7 +10,7 @@
   background: var(--overlay-bg);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
-  border-bottom: 1px solid rgba(238, 11, 30, 0.944);
+  border-bottom: 1px solid transparent;
 }
 
 .navbar.scrolled {
