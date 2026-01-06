@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -7,12 +7,14 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import './Building.css';
+import NotifyModal from './NotifyModal';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Building = () => {
   const sectionRef = useRef(null);
   const itemsRef = useRef([]);
+  const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false);
 
   useEffect(() => {
     if (sectionRef.current) {
@@ -177,11 +179,20 @@ const Building = () => {
 
         <div className="building-cta">
           <p>Want to be notified when these features launch?</p>
-          <button className="notify-btn">
+          <button 
+            className="notify-btn"
+            onClick={() => setIsNotifyModalOpen(true)}
+          >
             Notify Me
           </button>
         </div>
       </div>
+
+      {/* Notify Modal */}
+      <NotifyModal 
+        isOpen={isNotifyModalOpen} 
+        onClose={() => setIsNotifyModalOpen(false)} 
+      />
     </section>
   );
 };
