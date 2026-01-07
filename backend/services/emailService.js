@@ -9,6 +9,8 @@ class EmailService {
     this.resendApiKey = process.env.RESEND_API_KEY;
     this.adminEmail = process.env.ADMIN_EMAIL || 'contact@bannermind.in';
     this.fromName = process.env.EMAIL_FROM_NAME || 'BannerMind';
+    // Use Resend's test email if domain not verified, or your verified domain
+    // To use your own domain, verify it at https://resend.com/domains
     this.fromEmail = process.env.EMAIL_FROM_ADDRESS || 'onboarding@resend.dev';
     
     this.initialize();

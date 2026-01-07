@@ -13,6 +13,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ===========================================
+// PROXY TRUST (Required for Render, Heroku, etc.)
+// ===========================================
+// Trust first proxy - needed for express-rate-limit to work correctly
+// when behind a reverse proxy (Render, Heroku, Nginx, etc.)
+app.set('trust proxy', 1);
+
+// ===========================================
 // MIDDLEWARE
 // ===========================================
 
