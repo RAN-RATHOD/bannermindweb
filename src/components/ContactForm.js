@@ -225,7 +225,7 @@ const ContactForm = () => {
                 </svg>
               </div>
               <h3>Call Us</h3>
-              <p>+91 81779 70816</p>
+              <p>+91 8177970816</p>
             </div>
           </div>
 
