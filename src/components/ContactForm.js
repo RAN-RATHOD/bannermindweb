@@ -8,6 +8,11 @@ gsap.registerPlugin(ScrollTrigger);
 // API Configuration
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+// Debug: Log API URL in development
+if (process.env.NODE_ENV === 'development') {
+  console.log('API Base URL:', API_BASE_URL);
+}
+
 const ContactForm = () => {
   const [formData, setFormData] = useState({
     name: '',

@@ -1,94 +1,66 @@
-const nodemailer = require('nodemailer');
-
 /**
- * Email Service - Handles all email operations using Nodemailer
- * Supports Gmail, Zoho, and custom SMTP configurations
+ * Email Service - Handles all email operations using Resend API
+ * Resend works on Render free tier (no SMTP port blocking issues)
+ * Free tier: 3,000 emails/month
  */
 class EmailService {
   constructor() {
-    this.transporter = null;
     this.isConfigured = false;
-    this.adminEmail = process.env.ADMIN_EMAIL || 'itsfake0420@gmail.com';
+    this.resendApiKey = process.env.RESEND_API_KEY;
+    this.adminEmail = process.env.ADMIN_EMAIL || 'contact@bannermind.in';
     this.fromName = process.env.EMAIL_FROM_NAME || 'BannerMind';
-    this.fromEmail = process.env.EMAIL_FROM_ADDRESS || process.env.SMTP_USER;
+    this.fromEmail = process.env.EMAIL_FROM_ADDRESS || 'onboarding@resend.dev';
     
     this.initialize();
   }
 
   /**
-   * Initialize the email transporter
+   * Initialize the email service
    */
   initialize() {
-    try {
-      // Check if SMTP credentials are configured
-      if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-        console.warn('⚠️ Email service not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS in .env');
-        return;
-      }
-
-      // Create transporter based on configuration
-      this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT) || 587,
-        secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS
-        },
-        // Gmail specific settings
-        ...(process.env.SMTP_HOST === 'smtp.gmail.com' && {
-          service: 'gmail'
-        })
-      });
-
-      this.isConfigured = true;
-      console.log('✅ Email service initialized successfully');
-      
-      // Verify connection
-      this.verifyConnection();
-    } catch (error) {
-      console.error('❌ Email service initialization failed:', error.message);
+    if (!this.resendApiKey) {
+      console.warn('⚠️ Email service not configured. Set RESEND_API_KEY in environment variables.');
+      console.warn('   Get your free API key at: https://resend.com');
+      return;
     }
+
+    this.isConfigured = true;
+    console.log('✅ Email service initialized (Resend API)');
   }
 
   /**
-   * Verify SMTP connection
+   * Send email using Resend API
    */
-  async verifyConnection() {
-    if (!this.transporter) return false;
-    
-    try {
-      await this.transporter.verify();
-      console.log('✅ SMTP connection verified');
-      return true;
-    } catch (error) {
-      console.error('❌ SMTP verification failed:', error.message);
-      return false;
-    }
-  }
-
-  /**
-   * Send email
-   */
-  async sendEmail({ to, subject, html, text }) {
-    if (!this.isConfigured || !this.transporter) {
+  async sendEmail({ to, subject, html }) {
+    if (!this.isConfigured) {
       console.warn('⚠️ Email service not configured. Email not sent.');
       return { success: false, error: 'Email service not configured' };
     }
 
     try {
-      const mailOptions = {
-        from: `"${this.fromName}" <${this.fromEmail}>`,
-        to,
-        subject,
-        html,
-        text: text || this.stripHtml(html)
-      };
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.resendApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: `${this.fromName} <${this.fromEmail}>`,
+          to: [to],
+          subject: subject,
+          html: html
+        })
+      });
 
-      const info = await this.transporter.sendMail(mailOptions);
-      console.log(`✅ Email sent: ${info.messageId}`);
-      
-      return { success: true, messageId: info.messageId };
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log(`✅ Email sent successfully: ${data.id}`);
+        return { success: true, messageId: data.id };
+      } else {
+        console.error('❌ Email sending failed:', data.message || data);
+        return { success: false, error: data.message || 'Failed to send email' };
+      }
     } catch (error) {
       console.error('❌ Email sending failed:', error.message);
       return { success: false, error: error.message };
@@ -420,25 +392,7 @@ class EmailService {
 </html>
     `;
   }
-
-  /**
-   * Strip HTML tags for plain text fallback
-   */
-  stripHtml(html) {
-    return html
-      .replace(/<[^>]*>/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
 }
 
 // Export singleton instance
 module.exports = new EmailService();
-
-
-
-
-
-
-
-

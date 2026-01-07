@@ -2,27 +2,53 @@
    NOTIFY MODAL STYLES
    ============================================ */
 
+/* 
+ * SCROLLABLE MODAL PATTERN:
+ * - Overlay is scrollable (not flex/grid centering which cuts off top)
+ * - Modal stays within viewport with scroll capability
+ * - Works on desktop and mobile (including iOS touch)
+ */
+
 .notify-modal-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 10000;
-  padding: 1rem;
+  
+  /* KEY FIX: Scrollable overlay - NOT flex/grid center (which clips top) */
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  
+  /* Use flexbox with column + center for horizontal centering only */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  /* Padding creates space around modal and enables scrolling to top/bottom */
+  padding: 40px 16px;
 }
 
 .notify-modal {
   position: relative;
-  background: var(--bg-secondary);
+  background: var(--bg-secondary, #1e293b);
   border-radius: 20px;
   padding: 2rem;
   max-width: 440px;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
+  
+  /* Auto margin centers vertically when content fits, 
+     and provides spacing when scrolling is needed */
+  margin: auto;
+  
+  /* Ensure modal doesn't shrink */
+  flex-shrink: 0;
+  
   box-shadow: 
     0 25px 50px -12px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.1);
@@ -375,6 +401,11 @@
 
 /* Responsive */
 @media (max-width: 480px) {
+  .notify-modal-overlay {
+    padding: 20px 12px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
   .notify-modal {
     padding: 1.5rem;
     border-radius: 16px;
@@ -400,6 +431,22 @@
     flex-direction: row;
     justify-content: center;
     padding: 0.875rem;
+  }
+}
+
+/* Handle landscape mode on mobile */
+@media (max-height: 500px) {
+  .notify-modal-overlay {
+    padding: 16px 12px;
+  }
+  
+  .notify-modal-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .notify-modal-header {
+    margin-bottom: 1rem;
   }
 }
 

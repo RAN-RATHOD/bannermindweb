@@ -1,0 +1,62 @@
+# Render Blueprint for BannerMind
+# This file allows one-click deployment of all services
+
+services:
+  # Backend API Service
+  - type: web
+    name: bannermind-api
+    runtime: node
+    region: oregon # or singapore for Asia
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false # Set manually in dashboard
+      - key: ALLOWED_ORIGINS
+        sync: false # Set manually in dashboard
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_SECURE
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM_NAME
+        value: BannerMind
+      - key: EMAIL_FROM_ADDRESS
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+    healthCheckPath: /api/health
+
+  # Frontend Static Site
+  - type: web
+    name: bannermind-frontend
+    runtime: static
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          name: bannermind-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+
+
+

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { gsap } from 'gsap';
 import emailjs from '@emailjs/browser';
 import './NotifyModal.css';
@@ -32,10 +33,32 @@ const NotifyModal = ({ isOpen, onClose }) => {
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
 
-  // Animation on open/close
+  // Animation on open/close + Body scroll lock (production-ready)
   useEffect(() => {
     if (isOpen) {
+      // Store original body styles for restoration
+      const originalOverflow = document.body.style.overflow;
+      const originalPaddingRight = document.body.style.paddingRight;
+      
+      // Calculate scrollbar width to prevent layout shift
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // Lock body scroll (works on desktop and mobile)
       document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      
+      // iOS Safari fix: prevent touchmove on body
+      const preventTouchMove = (e) => {
+        // Allow scrolling inside the modal overlay
+        if (overlayRef.current && overlayRef.current.contains(e.target)) {
+          return;
+        }
+        e.preventDefault();
+      };
+      
+      document.body.addEventListener('touchmove', preventTouchMove, { passive: false });
+      
+      // Run animations
       gsap.fromTo(
         overlayRef.current,
         { opacity: 0 },
@@ -46,10 +69,14 @@ const NotifyModal = ({ isOpen, onClose }) => {
         { opacity: 0, y: 50, scale: 0.9 },
         { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'back.out(1.7)' }
       );
+      
+      // Cleanup function
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        document.body.style.paddingRight = originalPaddingRight;
+        document.body.removeEventListener('touchmove', preventTouchMove);
+      };
     }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
   }, [isOpen]);
 
   const handleClose = () => {
@@ -198,7 +225,9 @@ const NotifyModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  return (
+  // Use Portal to render modal outside the normal DOM hierarchy
+  // This escapes any overflow:hidden, transform, or stacking context issues
+  return createPortal(
     <div className="notify-modal-overlay" ref={overlayRef} onClick={handleClose}>
       <div
         className="notify-modal"
@@ -351,7 +380,8 @@ const NotifyModal = ({ isOpen, onClose }) => {
           </>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
