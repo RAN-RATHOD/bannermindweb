@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 // Import routes
 const notificationRoutes = require('./routes/notifications');
 const contactRoutes = require('./routes/contact');
+const launchNotifyRoutes = require('./routes/launchNotify');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -95,6 +96,7 @@ const generalLimiter = rateLimit({
 app.use('/api/', generalLimiter);
 app.use('/api/notifications/subscribe', subscriptionLimiter);
 app.use('/api/contact', contactLimiter);
+app.use('/api/launch-notify', subscriptionLimiter); // Same rate limit as notifications
 
 // ===========================================
 // ROUTES
@@ -110,11 +112,14 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Notification routes
+// Notification routes (legacy - phone/SMS)
 app.use('/api/notifications', notificationRoutes);
 
 // Contact form routes
 app.use('/api/contact', contactRoutes);
+
+// Launch notification routes (email-only)
+app.use('/api/launch-notify', launchNotifyRoutes);
 
 // 404 handler
 app.use((req, res) => {

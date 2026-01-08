@@ -229,6 +229,207 @@ class EmailService {
   }
 
   /**
+   * Send launch subscription confirmation email
+   */
+  async sendLaunchSubscriptionConfirmation(email) {
+    const subject = `🚀 You're on the BannerMind Launch List!`;
+    const html = this.getLaunchSubscriptionTemplate(email);
+    
+    return this.sendEmail({
+      to: email,
+      subject,
+      html
+    });
+  }
+
+  /**
+   * Send "We are live!" email to a subscriber
+   */
+  async sendLaunchAnnouncement(email) {
+    const subject = `🎉 BannerMind is LIVE! Start Creating Amazing Banners`;
+    const html = this.getLaunchAnnouncementTemplate(email);
+    
+    return this.sendEmail({
+      to: email,
+      subject,
+      html
+    });
+  }
+
+  /**
+   * Launch subscription confirmation template
+   */
+  getLaunchSubscriptionTemplate(email) {
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're on the list! - BannerMind</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d0d12;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; width: 100%; border-collapse: collapse; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(139, 92, 246, 0.15);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="padding: 50px 40px 30px; text-align: center; background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #ec4899 100%);">
+              <div style="font-size: 60px; margin-bottom: 15px;">🚀</div>
+              <h1 style="margin: 0 0 10px; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+                You're on the List!
+              </h1>
+              <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 16px;">
+                BannerMind launch notification confirmed
+              </p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px;">
+              <p style="margin: 0 0 20px; color: #e2e8f0; font-size: 16px; line-height: 1.7;">
+                Hi there! 👋
+              </p>
+              <p style="margin: 0 0 20px; color: #94a3b8; font-size: 15px; line-height: 1.7;">
+                Thank you for signing up to be notified when <strong style="color: #a855f7;">BannerMind</strong> launches! 
+                We're working hard to bring you the ultimate AI-powered banner creation platform.
+              </p>
+              
+              <!-- What to Expect -->
+              <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 12px; padding: 24px; margin: 24px 0;">
+                <h3 style="margin: 0 0 15px; color: #ffffff; font-size: 16px; font-weight: 600;">
+                  🎁 What you'll get:
+                </h3>
+                <ul style="margin: 0; padding-left: 20px; color: #94a3b8; font-size: 14px; line-height: 1.8;">
+                  <li><strong style="color: #22c55e;">First access</strong> when we launch</li>
+                  <li><strong style="color: #22c55e;">Exclusive early-bird pricing</strong></li>
+                  <li><strong style="color: #22c55e;">Behind-the-scenes updates</strong></li>
+                </ul>
+              </div>
+
+              <p style="margin: 20px 0 0; color: #64748b; font-size: 13px; text-align: center;">
+                📧 Subscribed as: <strong style="color: #a855f7;">${email}</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 25px 40px; background: rgba(0, 0, 0, 0.3); text-align: center;">
+              <p style="margin: 0 0 10px; color: #94a3b8; font-size: 14px;">
+                Stay tuned for the launch! 🎉
+              </p>
+              <p style="margin: 0; color: #64748b; font-size: 12px;">
+                © ${new Date().getFullYear()} BannerMind. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+  }
+
+  /**
+   * Launch announcement template ("We are live!")
+   */
+  getLaunchAnnouncementTemplate(email) {
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BannerMind is LIVE!</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d0d12;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; width: 100%; border-collapse: collapse; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(139, 92, 246, 0.15);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="padding: 50px 40px 30px; text-align: center; background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #ec4899 100%);">
+              <div style="font-size: 60px; margin-bottom: 15px;">🎉</div>
+              <h1 style="margin: 0 0 10px; color: #ffffff; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">
+                BannerMind is LIVE!
+              </h1>
+              <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 16px;">
+                The wait is over. Start creating stunning banners today!
+              </p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px;">
+              <p style="margin: 0 0 20px; color: #e2e8f0; font-size: 16px; line-height: 1.7;">
+                Hi there! 🙌
+              </p>
+              <p style="margin: 0 0 20px; color: #94a3b8; font-size: 15px; line-height: 1.7;">
+                The moment you've been waiting for is here! <strong style="color: #a855f7;">BannerMind</strong> 
+                is now live and ready for you to create amazing AI-powered banners.
+              </p>
+              
+              <!-- Features -->
+              <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 12px; padding: 24px; margin: 24px 0;">
+                <h3 style="margin: 0 0 15px; color: #ffffff; font-size: 16px; font-weight: 600;">
+                  ✨ What's waiting for you:
+                </h3>
+                <ul style="margin: 0; padding-left: 20px; color: #94a3b8; font-size: 14px; line-height: 1.8;">
+                  <li><strong style="color: #22c55e;">AI-Powered Banner Generation</strong></li>
+                  <li><strong style="color: #22c55e;">100+ Professional Templates</strong></li>
+                  <li><strong style="color: #22c55e;">One-Click Export in All Formats</strong></li>
+                  <li><strong style="color: #22c55e;">Early-Bird Exclusive Pricing</strong></li>
+                </ul>
+              </div>
+
+              <!-- CTA Button -->
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="https://bannermind.in" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); color: #ffffff; font-size: 18px; font-weight: 600; text-decoration: none; padding: 16px 40px; border-radius: 10px; box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);">
+                  🚀 Start Creating Now
+                </a>
+              </div>
+
+              <p style="margin: 20px 0 0; color: #64748b; font-size: 13px; text-align: center;">
+                Thank you for believing in us from the beginning! 💜
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 25px 40px; background: rgba(0, 0, 0, 0.3); text-align: center;">
+              <p style="margin: 0 0 10px; color: #94a3b8; font-size: 14px;">
+                Welcome to the future of banner creation!
+              </p>
+              <p style="margin: 0; color: #64748b; font-size: 12px;">
+                © ${new Date().getFullYear()} BannerMind. All rights reserved.
+              </p>
+              <p style="margin: 10px 0 0;">
+                <a href="https://bannermind.in" style="color: #8b5cf6; text-decoration: none; font-size: 12px;">bannermind.in</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+  }
+
+  /**
    * User confirmation email template
    */
   getUserEmailTemplate(contact) {

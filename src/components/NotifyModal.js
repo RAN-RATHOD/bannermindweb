@@ -1,28 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { gsap } from 'gsap';
-import emailjs from '@emailjs/browser';
 import './NotifyModal.css';
 
-// Country codes for phone validation
-const COUNTRY_CODES = [
-  { code: '+1', country: 'US/CA', flag: '🇺🇸' },
-  { code: '+91', country: 'India', flag: '🇮🇳' },
-  { code: '+44', country: 'UK', flag: '🇬🇧' },
-  { code: '+61', country: 'Australia', flag: '🇦🇺' },
-  { code: '+49', country: 'Germany', flag: '🇩🇪' },
-  { code: '+33', country: 'France', flag: '🇫🇷' },
-  { code: '+81', country: 'Japan', flag: '🇯🇵' },
-  { code: '+86', country: 'China', flag: '🇨🇳' },
-  { code: '+971', country: 'UAE', flag: '🇦🇪' },
-  { code: '+65', country: 'Singapore', flag: '🇸🇬' },
-];
+// API Base URL - uses environment variable or defaults to production
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bannermind1.onrender.com';
 
 const NotifyModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
-    countryCode: '+91',
-    phoneNumber: '',
-    notificationType: 'whatsapp',
+    email: '',
     consent: false,
   });
   const [errors, setErrors] = useState({});
@@ -90,9 +76,7 @@ const NotifyModal = ({ isOpen, onClose }) => {
         // Reset form after close
         setTimeout(() => {
           setFormData({
-            countryCode: '+91',
-            phoneNumber: '',
-            notificationType: 'whatsapp',
+            email: '',
             consent: false,
           });
           setErrors({});
@@ -104,24 +88,22 @@ const NotifyModal = ({ isOpen, onClose }) => {
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.2 });
   };
 
-  const validatePhoneNumber = (phone) => {
-    // Remove all non-digit characters
-    const cleaned = phone.replace(/\D/g, '');
-    // Check if it's between 7-15 digits (international standard)
-    return cleaned.length >= 7 && cleaned.length <= 15;
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = 'Phone number is required';
-    } else if (!validatePhoneNumber(formData.phoneNumber)) {
-      newErrors.phoneNumber = 'Please enter a valid phone number';
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email address is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
     }
 
     if (!formData.consent) {
-      newErrors.consent = 'You must agree to receive notifications';
+      newErrors.consent = 'You must agree to receive launch notifications';
     }
 
     setErrors(newErrors);
@@ -137,75 +119,32 @@ const NotifyModal = ({ isOpen, onClose }) => {
     setSubmitStatus(null);
     setErrorMessage('');
 
-    const fullPhoneNumber = `${formData.countryCode}${formData.phoneNumber.replace(/\D/g, '')}`;
-
     try {
-      // EmailJS configuration - uses same config as ContactForm
-      const serviceId = localStorage.getItem('emailjs_service_id') || 'service_bannermind';
-      const templateId = localStorage.getItem('emailjs_template_id') || 'template_notify';
-      const publicKey = localStorage.getItem('emailjs_public_key') || '';
+      const response = await fetch(`${API_BASE_URL}/api/launch-notify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email.trim().toLowerCase(),
+        }),
+      });
 
-      // If EmailJS is configured, send via email
-      if (publicKey) {
-        const templateParams = {
-          to_name: 'BannerMind Admin',
-          from_name: 'Launch Notification Request',
-          phone_number: fullPhoneNumber,
-          notification_type: formData.notificationType === 'whatsapp' ? 'WhatsApp' : 'SMS',
-          message: `New launch notification request:\n\nPhone: ${fullPhoneNumber}\nPreferred Channel: ${formData.notificationType === 'whatsapp' ? 'WhatsApp' : 'SMS'}\nTime: ${new Date().toLocaleString()}`,
-          reply_to: 'noreply@bannermind.app',
-        };
+      const data = await response.json();
 
-        await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      if (response.ok && data.success) {
         setSubmitStatus('success');
-        
-        // Also store locally for backup
-        const existingRequests = JSON.parse(localStorage.getItem('notify_requests') || '[]');
-        existingRequests.push({
-          phoneNumber: fullPhoneNumber,
-          notificationType: formData.notificationType,
-          createdAt: new Date().toISOString(),
-        });
-        localStorage.setItem('notify_requests', JSON.stringify(existingRequests));
+      } else if (response.status === 409 || data.duplicate) {
+        setSubmitStatus('duplicate');
+        setErrorMessage(data.message || 'This email is already subscribed');
       } else {
-        // Fallback: Store locally if EmailJS not configured
-        const existingRequests = JSON.parse(localStorage.getItem('notify_requests') || '[]');
-        
-        // Check for duplicates
-        const isDuplicate = existingRequests.some(req => req.phoneNumber === fullPhoneNumber);
-        if (isDuplicate) {
-          setSubmitStatus('duplicate');
-          setErrorMessage('This phone number is already registered for notifications');
-          return;
-        }
-
-        existingRequests.push({
-          phoneNumber: fullPhoneNumber,
-          notificationType: formData.notificationType,
-          createdAt: new Date().toISOString(),
-        });
-        localStorage.setItem('notify_requests', JSON.stringify(existingRequests));
-        setSubmitStatus('success');
-        
-        console.log('📱 Notification request saved locally:', {
-          phoneNumber: fullPhoneNumber,
-          type: formData.notificationType
-        });
+        setSubmitStatus('error');
+        setErrorMessage(data.message || 'Something went wrong. Please try again.');
       }
     } catch (error) {
       console.error('Subscription error:', error);
-      
-      // Even if EmailJS fails, save locally
-      const existingRequests = JSON.parse(localStorage.getItem('notify_requests') || '[]');
-      existingRequests.push({
-        phoneNumber: fullPhoneNumber,
-        notificationType: formData.notificationType,
-        createdAt: new Date().toISOString(),
-      });
-      localStorage.setItem('notify_requests', JSON.stringify(existingRequests));
-      
-      // Still show success since we saved locally
-      setSubmitStatus('success');
+      setSubmitStatus('error');
+      setErrorMessage('Network error. Please check your connection and try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -226,7 +165,6 @@ const NotifyModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   // Use Portal to render modal outside the normal DOM hierarchy
-  // This escapes any overflow:hidden, transform, or stacking context issues
   return createPortal(
     <div className="notify-modal-overlay" ref={overlayRef} onClick={handleClose}>
       <div
@@ -234,7 +172,7 @@ const NotifyModal = ({ isOpen, onClose }) => {
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="notify-modal-close" onClick={handleClose}>
+        <button className="notify-modal-close" onClick={handleClose} aria-label="Close modal">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
@@ -245,7 +183,7 @@ const NotifyModal = ({ isOpen, onClose }) => {
           <div className="notify-success">
             <div className="notify-success-icon">🎉</div>
             <h3>You're on the list!</h3>
-            <p>We'll notify you via {formData.notificationType === 'whatsapp' ? 'WhatsApp' : 'SMS'} when BannerMind launches.</p>
+            <p>We'll send you an email when BannerMind launches. Check your inbox for a confirmation!</p>
             <button className="notify-success-btn" onClick={handleClose}>
               Got it!
             </button>
@@ -253,81 +191,32 @@ const NotifyModal = ({ isOpen, onClose }) => {
         ) : (
           <>
             <div className="notify-modal-header">
-              <div className="notify-modal-icon">🔔</div>
+              <div className="notify-modal-icon">🚀</div>
               <h2>Get Notified at Launch</h2>
               <p>Be the first to know when BannerMind goes live!</p>
             </div>
 
             <form onSubmit={handleSubmit} className="notify-form">
-              {/* Phone Number Input */}
+              {/* Email Input */}
               <div className="notify-form-group">
-                <label htmlFor="phoneNumber">Phone Number *</label>
-                <div className="phone-input-wrapper">
-                  <select
-                    name="countryCode"
-                    value={formData.countryCode}
-                    onChange={handleInputChange}
-                    className="country-code-select"
-                  >
-                    {COUNTRY_CODES.map((country) => (
-                      <option key={country.code} value={country.code}>
-                        {country.flag} {country.code}
-                      </option>
-                    ))}
-                  </select>
+                <label htmlFor="email">Email Address *</label>
+                <div className="email-input-wrapper">
+                  <span className="email-icon">✉️</span>
                   <input
-                    type="tel"
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="Enter your phone number"
-                    className={errors.phoneNumber ? 'error' : ''}
+                    placeholder="your@email.com"
+                    className={errors.email ? 'error' : ''}
                     disabled={isSubmitting}
+                    autoComplete="email"
                   />
                 </div>
-                {errors.phoneNumber && (
-                  <span className="error-message">{errors.phoneNumber}</span>
+                {errors.email && (
+                  <span className="error-message">{errors.email}</span>
                 )}
-              </div>
-
-              {/* Notification Type */}
-              <div className="notify-form-group">
-                <label>How would you like to be notified? *</label>
-                <div className="notification-type-options">
-                  <label
-                    className={`notification-option ${
-                      formData.notificationType === 'whatsapp' ? 'selected' : ''
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="notificationType"
-                      value="whatsapp"
-                      checked={formData.notificationType === 'whatsapp'}
-                      onChange={handleInputChange}
-                      disabled={isSubmitting}
-                    />
-                    <span className="option-icon">💬</span>
-                    <span className="option-label">WhatsApp</span>
-                  </label>
-                  <label
-                    className={`notification-option ${
-                      formData.notificationType === 'sms' ? 'selected' : ''
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="notificationType"
-                      value="sms"
-                      checked={formData.notificationType === 'sms'}
-                      onChange={handleInputChange}
-                      disabled={isSubmitting}
-                    />
-                    <span className="option-icon">📱</span>
-                    <span className="option-label">SMS</span>
-                  </label>
-                </div>
               </div>
 
               {/* Consent Checkbox */}
@@ -350,7 +239,7 @@ const NotifyModal = ({ isOpen, onClose }) => {
                 )}
               </div>
 
-              {/* Error Message */}
+              {/* Error/Duplicate Message */}
               {(submitStatus === 'error' || submitStatus === 'duplicate') && (
                 <div className={`submit-message ${submitStatus}`}>
                   {submitStatus === 'duplicate' ? '📋' : '⚠️'} {errorMessage}
@@ -369,12 +258,15 @@ const NotifyModal = ({ isOpen, onClose }) => {
                     Subscribing...
                   </>
                 ) : (
-                  'Notify Me at Launch'
+                  <>
+                    <span className="btn-icon">🔔</span>
+                    Notify Me at Launch
+                  </>
                 )}
               </button>
 
               <p className="notify-privacy-note">
-                🔒 Your data is secure. We only use it to notify you once.
+                🔒 Your email is secure. We only use it to notify you at launch.
               </p>
             </form>
           </>
@@ -386,4 +278,3 @@ const NotifyModal = ({ isOpen, onClose }) => {
 };
 
 export default NotifyModal;
-
