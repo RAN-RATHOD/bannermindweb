@@ -1,29 +1,70 @@
+# ============================================
 # BannerMind - Robots.txt
-# https://bannermind.in
+# https://bannermind.onrender.com
+# ============================================
 
-# Allow all search engines to crawl the site
+# Allow all search engines to crawl the entire site
 User-agent: *
 Allow: /
-
-# Sitemap location
-Sitemap: https://bannermind.in/sitemap.xml
-
-# Crawl-delay for politeness (optional)
-Crawl-delay: 1
-
-# Disallow API endpoints (backend)
-User-agent: *
 Disallow: /api/
 
-# Allow Google to index everything
+# Sitemap location (IMPORTANT for indexing)
+Sitemap: https://bannermind.onrender.com/sitemap.xml
+
+# Crawl-delay for server politeness
+Crawl-delay: 1
+
+# Google Bot - Full access
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
-# Allow Bing to index everything
-User-agent: Bingbot
+User-agent: Googlebot-Image
 Allow: /
 
-# Block bad bots (optional)
+User-agent: Googlebot-Mobile
+Allow: /
+
+# Bing Bot - Full access
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Yahoo
+User-agent: Slurp
+Allow: /
+
+# DuckDuckGo
+User-agent: DuckDuckBot
+Allow: /
+
+# Yandex
+User-agent: Yandex
+Allow: /
+Crawl-delay: 2
+
+# Baidu
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 2
+
+# Facebook crawler (for link previews)
+User-agent: facebookexternalhit
+Allow: /
+
+# Twitter crawler (for card previews)
+User-agent: Twitterbot
+Allow: /
+
+# LinkedIn crawler
+User-agent: LinkedInBot
+Allow: /
+
+# Pinterest
+User-agent: Pinterest
+Allow: /
+
+# Block bad bots and scrapers
 User-agent: AhrefsBot
 Disallow: /
 
@@ -33,3 +74,24 @@ Disallow: /
 User-agent: MJ12bot
 Disallow: /
 
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: SearchmetricsBot
+Disallow: /
+
+# Block AI training bots (optional - remove if you want AI to train on your content)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
