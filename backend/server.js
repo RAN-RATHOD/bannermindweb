@@ -6,7 +6,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 // Import routes
-const notificationRoutes = require('./routes/notifications');
 const contactRoutes = require('./routes/contact');
 const launchNotifyRoutes = require('./routes/launchNotify');
 
@@ -94,9 +93,8 @@ const generalLimiter = rateLimit({
 });
 
 app.use('/api/', generalLimiter);
-app.use('/api/notifications/subscribe', subscriptionLimiter);
 app.use('/api/contact', contactLimiter);
-app.use('/api/launch-notify', subscriptionLimiter); // Same rate limit as notifications
+app.use('/api/launch-notify', subscriptionLimiter);
 
 // ===========================================
 // ROUTES
@@ -111,9 +109,6 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV || 'development'
   });
 });
-
-// Notification routes (legacy - phone/SMS)
-app.use('/api/notifications', notificationRoutes);
 
 // Contact form routes
 app.use('/api/contact', contactRoutes);
@@ -173,12 +168,12 @@ const startServer = async () => {
   
   app.listen(PORT, () => {
     console.log(`
-🚀 BannerMind Notification Server
+🚀 BannerMind API Server
 ================================
 📍 Port: ${PORT}
 🌍 Environment: ${process.env.NODE_ENV || 'development'}
 📦 MongoDB: ${process.env.MONGODB_URI ? 'Configured' : 'Local'}
-📱 Twilio: ${process.env.TWILIO_ACCOUNT_SID ? 'Configured' : 'Not configured'}
+📧 Email: ${process.env.RESEND_API_KEY ? 'Configured' : 'Not configured'}
 ================================
     `);
   });
