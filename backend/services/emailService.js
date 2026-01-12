@@ -28,6 +28,7 @@ class EmailService {
 
     this.isConfigured = true;
     console.log('✅ Email service initialized (Resend API)');
+    console.log(`📧 Sending emails from: ${this.fromName} <${this.fromEmail}>`);
   }
 
   /**
