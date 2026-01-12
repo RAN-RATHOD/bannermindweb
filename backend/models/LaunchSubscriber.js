@@ -76,3 +76,4 @@ const LaunchSubscriber = mongoose.model('LaunchSubscriber', launchSubscriberSche
 
 module.exports = LaunchSubscriber;
 
+
